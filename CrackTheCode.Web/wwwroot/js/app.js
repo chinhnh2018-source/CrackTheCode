@@ -74,17 +74,23 @@ function applyLoggedInUI() {
     document.getElementById("user-header-section").classList.remove("d-none");
     document.getElementById("user-header-section").classList.add("d-flex");
     document.getElementById("header-username").innerText = authState.username;
-    document.getElementById("login-nav-btn").classList.add("d-none");
-    document.getElementById("welcome-prompt-banner").classList.add("d-none");
+    document.getElementById("stats-nav-btn").classList.remove("d-none");
+    // Đã đăng nhập: hiện màn hình cài đặt trò chơi, ẩn màn đăng nhập
+    document.getElementById("auth-screen").classList.add("d-none");
+    document.getElementById("play-screen").classList.add("d-none");
+    document.getElementById("menu-screen").classList.remove("d-none");
 }
 
 function applyLoggedOutUI() {
     document.getElementById("user-header-section").classList.add("d-none");
     document.getElementById("user-header-section").classList.remove("d-flex");
-    document.getElementById("login-nav-btn").classList.remove("d-none");
-    document.getElementById("welcome-prompt-banner").classList.remove("d-none");
+    document.getElementById("stats-nav-btn").classList.add("d-none");
     authState.userId = null;
     authState.username = null;
+    // Chưa đăng nhập: chỉ hiện màn hình đăng nhập
+    document.getElementById("menu-screen").classList.add("d-none");
+    document.getElementById("play-screen").classList.add("d-none");
+    document.getElementById("auth-screen").classList.remove("d-none");
 }
 
 async function handleLogin() {
@@ -117,7 +123,6 @@ async function handleLogin() {
         localStorage.setItem("username", data.username);
 
         // Close modal
-        bootstrap.Modal.getInstance(document.getElementById("authModal"))?.hide();
         applyLoggedInUI();
         showToast(`Chào mừng trở lại, <strong>${data.username}</strong>! 🎉`, "success");
 
@@ -160,7 +165,6 @@ async function handleRegister() {
         localStorage.setItem("userId", data.userId);
         localStorage.setItem("username", data.username);
 
-        bootstrap.Modal.getInstance(document.getElementById("authModal"))?.hide();
         applyLoggedInUI();
         showToast(`Đăng ký thành công! Chào mừng <strong>${data.username}</strong> đến với Crack The Code! 🔐`, "success");
 
@@ -177,10 +181,6 @@ function logout() {
     authState.userId = null;
     authState.username = null;
     applyLoggedOutUI();
-
-    // If playing, go back to menu
-    document.getElementById("play-screen").classList.add("d-none");
-    document.getElementById("menu-screen").classList.remove("d-none");
 
     if (gameState.timerInterval) {
         clearInterval(gameState.timerInterval);
@@ -373,7 +373,7 @@ function handleGameModeChange() {
 
 function handleStartGame() {
     if (!authState.userId) {
-        bootstrap.Modal.getOrCreateInstance(document.getElementById("authModal")).show();
+        applyLoggedOutUI();
         showToast("Bạn cần đăng nhập trước để bắt đầu chơi!", "warning");
         return;
     }
@@ -417,7 +417,7 @@ function startChallengeStage(stageNum) {
 
 function startDailyPuzzle() {
     if (!authState.userId) {
-        bootstrap.Modal.getOrCreateInstance(document.getElementById("authModal")).show();
+        applyLoggedOutUI();
         return;
     }
     gameState.mode = "Daily";
@@ -464,8 +464,6 @@ function handleInvalidSession(msg) {
     authState.userId = null;
     authState.username = null;
     applyLoggedOutUI();
-    document.getElementById("play-screen").classList.add("d-none");
-    document.getElementById("menu-screen").classList.remove("d-none");
     if (gameState.timerInterval) {
         clearInterval(gameState.timerInterval);
     }
