@@ -158,18 +158,18 @@ namespace CrackTheCode.Web.Controllers
 
             if (request == null || string.IsNullOrWhiteSpace(request.Guess))
             {
-                return BadRequest(new { error = "Guess is required." });
+                return BadRequest(new { error = "Vui lòng nhập đáp án." });
             }
 
             var session = await _sessionRepository.GetByIdAsync(request.SessionId);
             if (session == null || session.UserId != userId)
             {
-                return NotFound(new { error = "Game session not found." });
+                return NotFound(new { error = "Không tìm thấy phiên chơi." });
             }
 
             if (session.IsCompleted)
             {
-                return BadRequest(new { error = "This game session is already finished." });
+                return BadRequest(new { error = "Phiên chơi này đã kết thúc." });
             }
 
             session.GuessesCount++;
@@ -216,10 +216,10 @@ namespace CrackTheCode.Web.Controllers
             if (request == null) return BadRequest();
 
             var session = await _sessionRepository.GetByIdAsync(request.SessionId);
-            if (session == null || session.UserId != userId) return NotFound(new { error = "Session not found." });
+            if (session == null || session.UserId != userId) return NotFound(new { error = "Không tìm thấy phiên chơi." });
 
             var puzzle = await _puzzleRepository.GetByIdAsync(session.PuzzleId);
-            if (puzzle == null) return NotFound(new { error = "Puzzle not found." });
+            if (puzzle == null) return NotFound(new { error = "Không tìm thấy câu đố." });
 
             if (request.Level == 1)
             {
@@ -237,7 +237,7 @@ namespace CrackTheCode.Web.Controllers
                 return Ok(new { level = 3, eliminatedDigits = eliminatedDigits });
             }
 
-            return BadRequest(new { error = "Invalid hint level." });
+            return BadRequest(new { error = "Cấp gợi ý không hợp lệ." });
         }
 
         // GET /api/showanswer
@@ -248,7 +248,7 @@ namespace CrackTheCode.Web.Controllers
             if (userId == null) return Unauthorized();
 
             var session = await _sessionRepository.GetByIdAsync(sessionId);
-            if (session == null || session.UserId != userId) return NotFound(new { error = "Session not found." });
+            if (session == null || session.UserId != userId) return NotFound(new { error = "Không tìm thấy phiên chơi." });
 
             if (!session.IsCompleted)
             {

@@ -480,7 +480,7 @@ function loadGameData(data) {
     gameState.eliminatedDigits = [];
 
     document.getElementById("game-title").innerText = getModeDisplayName(data.mode);
-    document.getElementById("game-subtitle").innerText = `Độ khó: ${data.difficulty} | ${data.digitsCount} chữ số | ${authState.username || "Khách"}`;
+    document.getElementById("game-subtitle").innerText = `Độ khó: ${getDifficultyDisplayName(data.difficulty)} | ${data.digitsCount} chữ số | ${authState.username || "Khách"}`;
 
     // Challenge stage header
     const challengeHeader = document.getElementById("challenge-stage-header");
@@ -759,4 +759,9 @@ function enableKeypadKeys() {
 function getModeDisplayName(mode) {
     const map = { Classic:"CHẾ ĐỘ CỔ ĐIỂN", TimeAttack:"⏱ CHẠY ĐUA THỜI GIAN", Infinite:"♾ CHẾ ĐỘ VÔ HẠN", Daily:"📅 THỬ THÁCH HÀNG NGÀY", Challenge:"🏆 THỬ THÁCH CHẶNG" };
     return map[mode] || "GIẢI MÃ SỐ";
+}
+
+function getDifficultyDisplayName(diff) {
+    const map = { Easy:"Dễ", Normal:"Thường", Hard:"Khó", Expert:"Chuyên Gia", Nightmare:"Ác Mộng" };
+    return map[diff] || diff;
 }

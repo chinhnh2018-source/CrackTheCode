@@ -24,13 +24,13 @@ namespace CrackTheCode.Web.Controllers
         {
             if (request == null || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
             {
-                return BadRequest(new { error = "Username và Password không được để trống." });
+                return BadRequest(new { error = "Tên đăng nhập và mật khẩu không được để trống." });
             }
 
             var user = await _authService.RegisterAsync(request.Username, request.Password);
             if (user == null)
             {
-                return BadRequest(new { error = "Username đã tồn tại hoặc không hợp lệ." });
+                return BadRequest(new { error = "Tên đăng nhập đã tồn tại hoặc không hợp lệ." });
             }
 
             return Ok(new { token = _tokenService.CreateToken(user), userId = user.Id, username = user.Username, message = "Đăng ký tài khoản thành công!" });
@@ -41,7 +41,7 @@ namespace CrackTheCode.Web.Controllers
         {
             if (request == null || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
             {
-                return BadRequest(new { error = "Username và Password không được để trống." });
+                return BadRequest(new { error = "Tên đăng nhập và mật khẩu không được để trống." });
             }
 
             var user = await _authService.LoginAsync(request.Username, request.Password);
