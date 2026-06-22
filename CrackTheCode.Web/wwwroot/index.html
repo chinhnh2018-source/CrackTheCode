@@ -79,9 +79,54 @@
         </div>
     </div>
 
+    <!-- ===== SCREEN: GAME HUB ===== -->
+    <div id="game-select-screen" class="d-none">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-accent mb-1"><i class="fa-solid fa-gamepad me-2"></i>Sảnh Game</h2>
+            <p class="text-muted small">Chọn một trò chơi trí tuệ để bắt đầu</p>
+        </div>
+        <div class="row g-3 justify-content-center">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card game-card h-100 p-4 text-center" role="button" data-game="crack">
+                    <div class="game-card-icon text-accent"><i class="fa-solid fa-key"></i></div>
+                    <h5 class="fw-bold mt-3 mb-1">Crack The Code</h5>
+                    <p class="text-muted small flex-grow-1">Suy luận mật mã bí mật từ các gợi ý logic.</p>
+                    <span class="btn btn-primary btn-sm mt-2"><i class="fa-solid fa-play me-1"></i>Chơi</span>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card game-card h-100 p-4 text-center" role="button" data-game="minesweeper">
+                    <div class="game-card-icon text-danger"><i class="fa-solid fa-bomb"></i></div>
+                    <h5 class="fw-bold mt-3 mb-1">Dò Mìn</h5>
+                    <p class="text-muted small flex-grow-1">Mở ô an toàn, cắm cờ đánh dấu mìn, tránh phát nổ.</p>
+                    <span class="btn btn-primary btn-sm mt-2"><i class="fa-solid fa-play me-1"></i>Chơi</span>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card game-card h-100 p-4 text-center" role="button" data-game="kakuro">
+                    <div class="game-card-icon text-warning"><i class="fa-solid fa-table-cells"></i></div>
+                    <h5 class="fw-bold mt-3 mb-1">Kakuro</h5>
+                    <p class="text-muted small flex-grow-1">Cộng chéo: điền 1–9 sao cho tổng mỗi dãy khớp gợi ý.</p>
+                    <span class="btn btn-primary btn-sm mt-2"><i class="fa-solid fa-play me-1"></i>Chơi</span>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card game-card h-100 p-4 text-center" role="button" data-game="kenken">
+                    <div class="game-card-icon text-info"><i class="fa-solid fa-calculator"></i></div>
+                    <h5 class="fw-bold mt-3 mb-1">KenKen</h5>
+                    <p class="text-muted small flex-grow-1">Lưới Latin kết hợp phép toán theo từng cụm.</p>
+                    <span class="btn btn-primary btn-sm mt-2"><i class="fa-solid fa-play me-1"></i>Chơi</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== SCREEN 1: MENU ===== -->
     <div id="menu-screen" class="row justify-content-center d-none">
         <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5">
+            <div class="mb-3">
+                <button class="btn btn-outline-secondary btn-sm" data-hub-back><i class="fa-solid fa-chevron-left me-1"></i>Sảnh Game</button>
+            </div>
             <div class="text-center mb-4">
                 <div class="lock-icon-container lock-pulsing">
                     <i class="fa-solid fa-lock fa-2x text-accent" id="menu-lock-icon"></i>
@@ -242,6 +287,77 @@
         </div><!-- /play-split -->
     </div><!-- /play-screen -->
 
+
+    <!-- ===== SCREEN: MINESWEEPER ===== -->
+    <div id="minesweeper-screen" class="d-none">
+        <div class="d-flex align-items-center justify-content-between mb-3 gap-2 flex-wrap">
+            <button class="btn btn-outline-secondary btn-sm" data-hub-back><i class="fa-solid fa-chevron-left me-1"></i>Sảnh Game</button>
+            <h5 class="fw-bold text-accent mb-0"><i class="fa-solid fa-bomb me-2"></i>Dò Mìn</h5>
+            <span style="width:90px"></span>
+        </div>
+        <div class="card p-3 p-md-4">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <select id="ms-level" class="form-select form-select-sm" style="width:auto">
+                    <option value="easy">Dễ (9×9)</option>
+                    <option value="medium">Vừa (12×14)</option>
+                    <option value="hard">Khó (14×18)</option>
+                </select>
+                <span class="badge bg-danger fs-6"><i class="fa-solid fa-bomb me-1"></i><span id="ms-mines">0</span></span>
+                <span class="badge bg-secondary fs-6"><i class="fa-solid fa-clock me-1"></i><span id="ms-time">0</span>s</span>
+                <button id="ms-flagmode" class="btn btn-outline-warning btn-sm">🚩 Cắm cờ</button>
+                <button id="ms-new" class="btn btn-primary btn-sm ms-auto"><i class="fa-solid fa-rotate-right me-1"></i>Mới</button>
+            </div>
+            <div class="ms-wrap"><div class="ms-grid" id="ms-grid"></div></div>
+            <div id="ms-feedback" class="d-none"></div>
+            <p class="text-muted small mt-3 mb-0">Nhấn ô để mở · chuột phải (hoặc bật “Cắm cờ”) để đánh dấu mìn.</p>
+        </div>
+    </div>
+
+    <!-- ===== SCREEN: KAKURO ===== -->
+    <div id="kakuro-screen" class="d-none">
+        <div class="d-flex align-items-center justify-content-between mb-3 gap-2 flex-wrap">
+            <button class="btn btn-outline-secondary btn-sm" data-hub-back><i class="fa-solid fa-chevron-left me-1"></i>Sảnh Game</button>
+            <h5 class="fw-bold text-accent mb-0"><i class="fa-solid fa-table-cells me-2"></i>Kakuro</h5>
+            <span style="width:90px"></span>
+        </div>
+        <div class="card p-3 p-md-4">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <select id="kakuro-level" class="form-select form-select-sm" style="width:auto">
+                    <option value="easy">Dễ (6×6)</option>
+                    <option value="medium">Vừa (7×8)</option>
+                </select>
+                <button id="kakuro-check" class="btn btn-success btn-sm"><i class="fa-solid fa-check-double me-1"></i>Kiểm tra</button>
+                <button id="kakuro-new" class="btn btn-outline-secondary btn-sm ms-auto"><i class="fa-solid fa-eraser me-1"></i>Làm lại</button>
+            </div>
+            <div class="text-muted small mb-2">Số góc trên-phải = tổng hàng ngang → · số góc dưới-trái = tổng cột dọc ↓ · mỗi dãy không trùng số.</div>
+            <div class="grid-wrap"><div class="num-grid" id="kakuro-grid"></div></div>
+            <div id="kakuro-feedback" class="d-none"></div>
+        </div>
+    </div>
+
+    <!-- ===== SCREEN: KENKEN ===== -->
+    <div id="kenken-screen" class="d-none">
+        <div class="d-flex align-items-center justify-content-between mb-3 gap-2 flex-wrap">
+            <button class="btn btn-outline-secondary btn-sm" data-hub-back><i class="fa-solid fa-chevron-left me-1"></i>Sảnh Game</button>
+            <h5 class="fw-bold text-accent mb-0"><i class="fa-solid fa-calculator me-2"></i>KenKen</h5>
+            <span style="width:90px"></span>
+        </div>
+        <div class="card p-3 p-md-4">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <select id="kenken-level" class="form-select form-select-sm" style="width:auto">
+                    <option value="4">4×4 (dễ)</option>
+                    <option value="5">5×5 (vừa)</option>
+                    <option value="6">6×6 (khó)</option>
+                </select>
+                <button id="kenken-check" class="btn btn-success btn-sm"><i class="fa-solid fa-check-double me-1"></i>Kiểm tra</button>
+                <button id="kenken-new" class="btn btn-outline-secondary btn-sm ms-auto"><i class="fa-solid fa-rotate-right me-1"></i>Đề mới</button>
+            </div>
+            <div class="text-muted small mb-2">Mỗi hàng/cột chứa đủ các số 1..N không lặp · mỗi cụm (viền đậm) phải ra kết quả phép toán ghi ở góc.</div>
+            <div class="grid-wrap"><div class="num-grid" id="kenken-grid"></div></div>
+            <div id="kenken-feedback" class="d-none"></div>
+        </div>
+    </div>
+
 </div><!-- /container -->
 
 <!-- ===== MODAL: STATS ===== -->
@@ -300,6 +416,10 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/sounds.js"></script>
 <script src="js/effects.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/minesweeper.js"></script>
+<script src="js/kenken.js"></script>
+<script src="js/kakuro.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

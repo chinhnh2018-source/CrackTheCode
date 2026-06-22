@@ -76,9 +76,7 @@ function applyLoggedInUI() {
     document.getElementById("header-username").innerText = authState.username;
     document.getElementById("stats-nav-btn").classList.remove("d-none");
     // Đã đăng nhập: hiện màn hình cài đặt trò chơi, ẩn màn đăng nhập
-    document.getElementById("auth-screen").classList.add("d-none");
-    document.getElementById("play-screen").classList.add("d-none");
-    document.getElementById("menu-screen").classList.remove("d-none");
+    gotoHub();
     Sound.startBgm();
 }
 
@@ -89,9 +87,7 @@ function applyLoggedOutUI() {
     authState.userId = null;
     authState.username = null;
     // Chưa đăng nhập: chỉ hiện màn hình đăng nhập
-    document.getElementById("menu-screen").classList.add("d-none");
-    document.getElementById("play-screen").classList.add("d-none");
-    document.getElementById("auth-screen").classList.remove("d-none");
+    gotoScreen("auth-screen");
 }
 
 async function handleLogin() {
@@ -520,8 +516,7 @@ function loadGameData(data) {
     generateDigitBoxes(data.digitsCount);
     enableKeypadKeys();
 
-    document.getElementById("menu-screen").classList.add("d-none");
-    document.getElementById("play-screen").classList.remove("d-none");
+    gotoScreen("play-screen");
 }
 
 function renderClues(clues) {
@@ -555,8 +550,7 @@ function resetPlayUI() {
 
 function exitToMenu() {
     if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-    document.getElementById("play-screen").classList.add("d-none");
-    document.getElementById("menu-screen").classList.remove("d-none");
+    gotoScreen("menu-screen");
 }
 
 // ============================================================
