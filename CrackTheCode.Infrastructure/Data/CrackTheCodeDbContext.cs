@@ -26,6 +26,13 @@ namespace CrackTheCode.Infrastructure.Data
                 .HasForeignKey(c => c.PuzzleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Configure GameSession -> User relationship (optional FK, set null on delete)
+            modelBuilder.Entity<GameSession>()
+                .HasOne(gs => gs.User)
+                .WithMany()
+                .HasForeignKey(gs => gs.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Unique index on date for daily puzzles
             modelBuilder.Entity<DailyPuzzle>()
                 .HasIndex(dp => dp.Date)

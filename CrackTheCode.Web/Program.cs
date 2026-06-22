@@ -1,7 +1,11 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using CrackTheCode.Web.Services;
 using CrackTheCode.Application.Interfaces;
 using CrackTheCode.Application.Services;
 using CrackTheCode.Domain.Interfaces;
@@ -29,77 +33,38 @@ builder.Services.AddScoped<IHintEngine, HintEngine>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 builder.Services.AddScoped<IDailyPuzzleService, DailyPuzzleService>();
 
+// JWT authentication — identity comes from a server-signed token, not a client header
+builder.Services.AddSingleton<JwtTokenService>();
+var jwtSection = builder.Configuration.GetSection("Jwt");
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSection["Issuer"],
+            ValidAudience = jwtSection["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSection["Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured.")))
+        };
+    });
+builder.Services.AddAuthorization();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 // -------------------------------------------------------
-// DATABASE INIT + AUTO-MIGRATION (safe, non-destructive)
+// DATABASE INIT — apply EF Core migrations (deterministic schema, real FKs)
 // -------------------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<CrackTheCodeDbContext>();
-
-    // Create tables that do not yet exist
-    context.Database.EnsureCreated();
-
-    // Patch existing DB with any new columns added after first deployment
-    RunMigrations(context);
-}
-
-static void RunMigrations(CrackTheCodeDbContext context)
-{
-    var conn = context.Database.GetDbConnection();
-    if (conn.State != System.Data.ConnectionState.Open)
-        conn.Open();
-
-    // -- 1. GameSessions.UserId (added in v2 for multi-player) --
-    if (!ColumnExists(conn, "GameSessions", "UserId"))
-    {
-        Exec(conn, @"ALTER TABLE ""GameSessions"" ADD COLUMN ""UserId"" TEXT NULL");
-        Console.WriteLine("[Migration] GameSessions.UserId column added.");
-    }
-
-    // -- 2. Users table (added in v2) --
-    if (!TableExists(conn, "Users"))
-    {
-        Exec(conn, @"
-            CREATE TABLE IF NOT EXISTS ""Users"" (
-                ""Id""           TEXT NOT NULL PRIMARY KEY,
-                ""Username""     TEXT NOT NULL,
-                ""PasswordHash"" TEXT NOT NULL,
-                ""CreatedAt""    TEXT NOT NULL
-            )");
-        Exec(conn, @"CREATE UNIQUE INDEX IF NOT EXISTS ""IX_Users_Username"" ON ""Users"" (""Username"")");
-        Console.WriteLine("[Migration] Users table created.");
-    }
-
-    conn.Close();
-}
-
-static void Exec(System.Data.Common.DbConnection conn, string sql)
-{
-    using var cmd = conn.CreateCommand();
-    cmd.CommandText = sql;
-    cmd.ExecuteNonQuery();
-}
-
-static bool ColumnExists(System.Data.Common.DbConnection conn, string table, string column)
-{
-    using var cmd = conn.CreateCommand();
-    cmd.CommandText = $"PRAGMA table_info(\"{table}\")";
-    using var r = cmd.ExecuteReader();
-    while (r.Read())
-        if (r["name"]?.ToString() == column) return true;
-    return false;
-}
-
-static bool TableExists(System.Data.Common.DbConnection conn, string table)
-{
-    using var cmd = conn.CreateCommand();
-    cmd.CommandText = $"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'";
-    return cmd.ExecuteScalar() != null;
+    context.Database.Migrate();
 }
 
 // -------------------------------------------------------
@@ -113,6 +78,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseDefaultFiles();
 app.UseStaticFiles();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

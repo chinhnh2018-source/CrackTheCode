@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CrackTheCode.Application.Interfaces;
 using CrackTheCode.Domain.Entities;
@@ -11,6 +13,7 @@ namespace CrackTheCode.Web.Controllers
 {
     [ApiController]
     [Route("api")]
+    [Authorize]
     public class GameController : ControllerBase
     {
         private readonly IPuzzleGenerator _generator;
@@ -41,12 +44,12 @@ namespace CrackTheCode.Web.Controllers
 
         private Guid? GetUserIdFromHeaders()
         {
-            if (Request.Headers.TryGetValue("X-User-Id", out var userIdStr))
+            // Identity comes from the verified JWT (see [Authorize] + JwtBearer),
+            // not a client-supplied header — so it cannot be spoofed.
+            var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(sub, out var userId))
             {
-                if (Guid.TryParse(userIdStr, out var userId))
-                {
-                    return userId;
-                }
+                return userId;
             }
             return null;
         }

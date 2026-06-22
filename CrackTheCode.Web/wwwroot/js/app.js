@@ -20,7 +20,8 @@ let gameState = {
 // Auth State (persisted to localStorage)
 let authState = {
     userId: null,
-    username: null
+    username: null,
+    token: null
 };
 
 // ============================================================
@@ -56,9 +57,11 @@ function registerEventListeners() {
 // AUTH MANAGEMENT
 // ============================================================
 function loadAuthFromStorage() {
+    const savedToken = localStorage.getItem("token");
     const savedUserId = localStorage.getItem("userId");
     const savedUsername = localStorage.getItem("username");
-    if (savedUserId && savedUsername) {
+    if (savedToken && savedUserId && savedUsername) {
+        authState.token = savedToken;
         authState.userId = savedUserId;
         authState.username = savedUsername;
         applyLoggedInUI();
@@ -106,8 +109,10 @@ async function handleLogin() {
             return;
         }
 
+        authState.token = data.token;
         authState.userId = data.userId;
         authState.username = data.username;
+        localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.userId);
         localStorage.setItem("username", data.username);
 
@@ -148,8 +153,10 @@ async function handleRegister() {
             return;
         }
 
+        authState.token = data.token;
         authState.userId = data.userId;
         authState.username = data.username;
+        localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.userId);
         localStorage.setItem("username", data.username);
 
@@ -163,8 +170,12 @@ async function handleRegister() {
 }
 
 function logout() {
+    localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("username");
+    authState.token = null;
+    authState.userId = null;
+    authState.username = null;
     applyLoggedOutUI();
 
     // If playing, go back to menu
@@ -185,10 +196,11 @@ function showAuthAlert(msg, type) {
 }
 
 function getAuthHeaders() {
-    return {
-        "Content-Type": "application/json",
-        "X-User-Id": authState.userId || ""
-    };
+    const headers = { "Content-Type": "application/json" };
+    if (authState.token) {
+        headers["Authorization"] = "Bearer " + authState.token;
+    }
+    return headers;
 }
 
 // ============================================================
@@ -445,8 +457,10 @@ function initiateNewGame(difficulty, digitsCount, mode, timeLimit, allowDuplicat
 
 // Clears a stale/invalid local session and sends the user back to login.
 function handleInvalidSession(msg) {
+    localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("username");
+    authState.token = null;
     authState.userId = null;
     authState.username = null;
     applyLoggedOutUI();

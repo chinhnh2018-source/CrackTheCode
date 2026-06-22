@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CrackTheCode.Application.Interfaces;
+using CrackTheCode.Web.Services;
 
 namespace CrackTheCode.Web.Controllers
 {
@@ -10,10 +11,12 @@ namespace CrackTheCode.Web.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly JwtTokenService _tokenService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, JwtTokenService tokenService)
         {
             _authService = authService;
+            _tokenService = tokenService;
         }
 
         [HttpPost("register")]
@@ -30,7 +33,7 @@ namespace CrackTheCode.Web.Controllers
                 return BadRequest(new { error = "Username đã tồn tại hoặc không hợp lệ." });
             }
 
-            return Ok(new { userId = user.Id, username = user.Username, message = "Đăng ký tài khoản thành công!" });
+            return Ok(new { token = _tokenService.CreateToken(user), userId = user.Id, username = user.Username, message = "Đăng ký tài khoản thành công!" });
         }
 
         [HttpPost("login")]
@@ -47,7 +50,7 @@ namespace CrackTheCode.Web.Controllers
                 return BadRequest(new { error = "Tên đăng nhập hoặc mật khẩu không chính xác." });
             }
 
-            return Ok(new { userId = user.Id, username = user.Username, message = "Đăng nhập thành công!" });
+            return Ok(new { token = _tokenService.CreateToken(user), userId = user.Id, username = user.Username, message = "Đăng nhập thành công!" });
         }
     }
 
