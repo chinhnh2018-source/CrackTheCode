@@ -79,6 +79,7 @@ function applyLoggedInUI() {
     document.getElementById("auth-screen").classList.add("d-none");
     document.getElementById("play-screen").classList.add("d-none");
     document.getElementById("menu-screen").classList.remove("d-none");
+    Sound.startBgm();
 }
 
 function applyLoggedOutUI() {
@@ -273,7 +274,7 @@ function buildKeypad() {
     const clearBtn = document.createElement("button");
     clearBtn.className = "keypad-btn btn-key text-danger fw-bold";
     clearBtn.innerHTML = "C";
-    clearBtn.addEventListener("click", clearAllDigits);
+    clearBtn.addEventListener("click", () => { Sound.play("key"); clearAllDigits(); });
     keypad.appendChild(clearBtn);
 }
 
@@ -309,6 +310,7 @@ function highlightActiveBox() {
 }
 
 function enterDigit(num) {
+    Sound.play("key");
     const boxes = document.querySelectorAll(".digit-box");
     if (gameState.activeDigitIndex < gameState.digitsCount) {
         boxes[gameState.activeDigitIndex].value = num;
@@ -320,6 +322,7 @@ function enterDigit(num) {
 }
 
 function backspaceDigit() {
+    Sound.play("key");
     const boxes = document.querySelectorAll(".digit-box");
     if (boxes[gameState.activeDigitIndex].value !== "") {
         boxes[gameState.activeDigitIndex].value = "";
@@ -586,6 +589,7 @@ function submitGuess() {
 }
 
 function handleGameWin(secretCode) {
+    Sound.play("win");
     if (gameState.timerInterval) clearInterval(gameState.timerInterval);
     disableKeypadKeys();
     showFeedback(`🎉 CHÚC MỪNG, <strong>${authState.username || "Bạn"}</strong>! Đã bẻ khóa thành công! Mật mã là <strong>${secretCode}</strong>.`, "success");
@@ -599,6 +603,7 @@ function handleGameWin(secretCode) {
 }
 
 function handleGameIncorrect(serverMsg, guess) {
+    Sound.play("wrong");
     showFeedback(serverMsg, "danger");
     clearAllDigits();
     addGuessToHistory(guess, serverMsg);
@@ -681,6 +686,7 @@ window.triggerFetchHint = function(level) {
 };
 
 function injectHintClue(text, level) {
+    Sound.play("hint");
     const list = document.getElementById("clues-list");
     const div = document.createElement("div");
     div.className = "clue-item clue-success";
@@ -692,6 +698,7 @@ function injectHintClue(text, level) {
 // SHOW ANSWER / FORFEIT
 // ============================================================
 function forfeitAndShowAnswer() {
+    Sound.play("lose");
     if (gameState.timerInterval) clearInterval(gameState.timerInterval);
     fetch(`/api/showanswer?sessionId=${gameState.sessionId}`, { headers: getAuthHeaders() })
         .then(res => res.json())
