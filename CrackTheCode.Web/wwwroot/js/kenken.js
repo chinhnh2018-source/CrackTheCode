@@ -85,7 +85,7 @@ const KenKen = (() => {
 
     function render() {
         const grid = document.getElementById("kenken-grid");
-        grid.style.gridTemplateColumns = `repeat(${N}, 48px)`;
+        grid.style.gridTemplateColumns = `repeat(${N}, 64px)`;
         grid.innerHTML = "";
         for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
             const cell = document.createElement("div");

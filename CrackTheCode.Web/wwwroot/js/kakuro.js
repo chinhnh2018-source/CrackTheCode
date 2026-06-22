@@ -11,7 +11,7 @@ function renderKakuro() {
     const board = kkBoard();
     const R = board.length, C = board[0].length;
     const grid = document.getElementById("kakuro-grid");
-    grid.style.gridTemplateColumns = `repeat(${C}, 48px)`;
+    grid.style.gridTemplateColumns = `repeat(${C}, 64px)`;
     grid.innerHTML = "";
     for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
         const spec = board[r][c];

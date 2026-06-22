@@ -113,7 +113,7 @@ const Minesweeper = (() => {
 
     function render() {
         const grid = document.getElementById("ms-grid");
-        grid.style.gridTemplateColumns = `repeat(${C}, 30px)`;
+        grid.style.gridTemplateColumns = `repeat(${C}, 40px)`;
         grid.innerHTML = "";
         for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
             const cell = cells[r][c];
