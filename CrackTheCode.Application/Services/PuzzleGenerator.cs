@@ -111,24 +111,17 @@ namespace CrackTheCode.Application.Services
                     break;
             }
 
-            // 5. Target clue count per difficulty
-            int target = diff switch
-            {
-                Difficulty.Easy      => 3,
-                Difficulty.Normal    => 4,
-                Difficulty.Hard      => 5,
-                Difficulty.Expert    => 5,
-                Difficulty.Nightmare => 3,
-                _                    => 4
-            };
+            // 5. Target clue count per difficulty (MUST match the label shown in the UI)
+            int target = TargetClueCount(diff);
 
-            // 6. Greedy pick with TYPE DIVERSITY LIMIT (max 1 per ClueType)
+            // 6. Greedy pick toward a UNIQUE solution, preferring type diversity.
+            //    Every clue in the pool is TRUE for the secret, so adding clues only ever
+            //    shrinks the solution set (the secret always stays in it).
             var selected = new List<Clue>();
             var usedTypes = new HashSet<ClueType>();
 
             foreach (var clue in orderedPool)
             {
-                // Enforce diversity: skip if we already have this ClueType
                 if (usedTypes.Contains(clue.Type)) continue;
 
                 selected.Add(clue);
@@ -138,7 +131,7 @@ namespace CrackTheCode.Application.Services
 
                 if (solutions.Count == 0)
                 {
-                    // This clue conflicts — remove it
+                    // Safety net (shouldn't happen for true clues) — drop it
                     selected.RemoveAt(selected.Count - 1);
                     usedTypes.Remove(clue.Type);
                     continue;
@@ -146,23 +139,38 @@ namespace CrackTheCode.Application.Services
 
                 if (solutions.Count == 1 && solutions[0] == secret)
                 {
-                    // Found unique solution!
-                    if (selected.Count >= target)
-                        return selected;
-
-                    // Need more clues to hit target count → keep going
+                    // Uniquely solvable — stop searching for more deduction clues
+                    break;
                 }
             }
 
-            // 7. Check if final selected set still uniquely solves
-            if (selected.Count >= 2)
+            // Must be uniquely solvable to the secret, otherwise retry another secret
+            var check = _solver.Solve(len, min, max, dupes, selected);
+            if (check.Count != 1 || check[0] != secret)
+                return null;
+
+            // If this secret needs MORE clues than the difficulty advertises, reject it so
+            // the outer loop can find one that fits exactly (keeps count == label).
+            if (selected.Count > target)
+                return null;
+
+            // 7. Pad up to EXACTLY the advertised count with extra true clues. Repeated
+            //    ClueTypes are allowed here, and padding can never break uniqueness.
+            if (selected.Count < target)
             {
-                var final = _solver.Solve(len, min, max, dupes, selected);
-                if (final.Count == 1 && final[0] == secret)
-                    return selected;
+                foreach (var clue in orderedPool)
+                {
+                    if (selected.Count >= target) break;
+                    bool already = selected.Any(sc =>
+                        sc.Type == clue.Type && sc.Guess == clue.Guess &&
+                        sc.Value == clue.Value && sc.SecondaryValue == clue.SecondaryValue);
+                    if (already) continue;
+                    selected.Add(clue);
+                }
             }
 
-            return null;
+            // 8. Accept only if we landed on the exact target count
+            return selected.Count == target ? selected : null;
         }
 
         // -------------------------------------------------------
@@ -315,8 +323,9 @@ namespace CrackTheCode.Application.Services
             }
             else
             {
-                // Both bulls and cows: add as a combined clue (use CorrectDigitsAndPositions type)
-                clues.Add(new Clue { Type = ClueType.CorrectDigitsAndPositions, Guess = guess, Value = bulls,
+                // Both bulls and cows: store cows in SecondaryValue so BOTH numbers are
+                // actually enforced by the solver (not just displayed).
+                clues.Add(new Clue { Type = ClueType.CorrectDigitsAndPositions, Guess = guess, Value = bulls, SecondaryValue = cows,
                     Description = $"[ {fmt} ] — Có {bulls} số đúng vị trí, {cows} số sai vị trí" });
             }
         }
@@ -360,19 +369,50 @@ namespace CrackTheCode.Application.Services
 
         private bool IsPrime(int d) => d == 2 || d == 3 || d == 5 || d == 7;
 
+        // Single source of truth for how many clues each difficulty shows.
+        // Keep this in sync with the difficulty labels in wwwroot/index.html.
+        private static int TargetClueCount(Difficulty diff) => diff switch
+        {
+            Difficulty.Easy      => 3,
+            Difficulty.Normal    => 4,
+            Difficulty.Hard      => 5,
+            Difficulty.Expert    => 5,
+            Difficulty.Nightmare => 3,
+            _                    => 4
+        };
+
         private Puzzle Fallback(Difficulty diff, int len, int min, int max, bool dupes)
         {
             string secret = string.Join("", Enumerable.Range(min + 1, len).Reverse());
+            int target = TargetClueCount(diff);
+
+            // Build all clues that are TRUE for this fixed secret, then take exactly
+            // `target` of them so the count still matches the advertised label.
+            var rng = new Random();
+            var pool = GeneratePool(secret, len, min, max, dupes, rng);
+
+            var clues = new List<Clue>();
+            var usedTypes = new HashSet<ClueType>();
+            foreach (var c in pool)
+            {
+                if (usedTypes.Contains(c.Type)) continue;
+                clues.Add(c);
+                usedTypes.Add(c.Type);
+                if (clues.Count >= target) break;
+            }
+            // Allow repeated types if the diverse pass was short
+            foreach (var c in pool)
+            {
+                if (clues.Count >= target) break;
+                if (clues.Contains(c)) continue;
+                clues.Add(c);
+            }
+
             return new Puzzle
             {
                 SecretCode = secret, Difficulty = diff, DigitsCount = len,
                 MinDigit = min, MaxDigit = max, AllowDuplicates = dupes,
-                Clues = new List<Clue>
-                {
-                    new Clue { Type = ClueType.SumEquals,     Value = secret.Sum(c=>c-'0'), Description = $"Tổng các chữ số = {secret.Sum(c=>c-'0')}" },
-                    new Clue { Type = ClueType.MaxDigitEquals, Value = secret.Max(c=>c-'0'), Description = $"Chữ số lớn nhất là {secret.Max(c=>c-'0')}" },
-                    new Clue { Type = ClueType.MinDigitEquals, Value = secret.Min(c=>c-'0'), Description = $"Chữ số nhỏ nhất là {secret.Min(c=>c-'0')}" }
-                },
+                Clues = clues,
                 CreatedAt = DateTime.UtcNow
             };
         }

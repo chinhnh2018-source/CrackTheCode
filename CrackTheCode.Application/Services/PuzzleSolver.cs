@@ -56,7 +56,12 @@ namespace CrackTheCode.Application.Services
             switch (clue.Type)
             {
                 case ClueType.CorrectDigitsAndPositions:
-                    return CountBulls(candidate, clue.Guess!) == clue.Value;
+                    if (CountBulls(candidate, clue.Guess!) != clue.Value) return false;
+                    // Combined guess clues also carry the cows count in SecondaryValue.
+                    // Enforce it so the displayed "x đúng vị trí, y sai vị trí" is guaranteed.
+                    if (clue.SecondaryValue.HasValue && CountCows(candidate, clue.Guess!) != clue.SecondaryValue.Value)
+                        return false;
+                    return true;
 
                 case ClueType.CorrectDigitsWrongPositions:
                     return CountCows(candidate, clue.Guess!) == clue.Value;
