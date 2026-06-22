@@ -1,0 +1,8 @@
+## .NET / Visual Studio
+bin/
+obj/
+*.user
+.vs/
+*.db
+*.db-shm
+*.db-wal

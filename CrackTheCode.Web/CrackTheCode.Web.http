@@ -1,0 +1,6 @@
+@CrackTheCode.Web_HostAddress = http://localhost:5213
+
+GET {{CrackTheCode.Web_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

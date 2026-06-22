@@ -1,0 +1,279 @@
+
+/* =====================================================
+   CRACK THE CODE — Master Stylesheet v3.0
+   ===================================================== */
+
+/* ----------- CSS VARIABLES ----------- */
+:root {
+    --bg-body:      #f0f4f8;
+    --bg-card:      #ffffff;
+    --bg-input:     #f8fafc;
+    --bg-key:       #e2e8f0;
+    --bg-key-hover: #cbd5e1;
+    --text-primary: #1e293b;
+    --text-muted:   #64748b;
+    --border:       #e2e8f0;
+    --accent:       #3b82f6;
+    --accent-glow:  rgba(59,130,246,0.25);
+    --success:      #22c55e;
+    --danger:       #ef4444;
+    --warning:      #f59e0b;
+    --shadow-sm:    0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md:    0 4px 12px rgba(0,0,0,0.10);
+    --shadow-lg:    0 10px 30px rgba(0,0,0,0.12);
+    --radius:       14px;
+    --radius-sm:    8px;
+}
+
+[data-theme="dark"] {
+    --bg-body:      #0f172a;
+    --bg-card:      #1e293b;
+    --bg-input:     #0f172a;
+    --bg-key:       #334155;
+    --bg-key-hover: #475569;
+    --text-primary: #f1f5f9;
+    --text-muted:   #94a3b8;
+    --border:       #334155;
+    --accent:       #60a5fa;
+    --accent-glow:  rgba(96,165,250,0.30);
+    --shadow-sm:    0 1px 3px rgba(0,0,0,0.30);
+    --shadow-md:    0 4px 12px rgba(0,0,0,0.40);
+    --shadow-lg:    0 10px 30px rgba(0,0,0,0.50);
+}
+
+/* ----------- RESET & BASE ----------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { height: 100%; }
+
+body {
+    background: var(--bg-body);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    transition: background .3s, color .3s;
+    margin: 0;
+}
+
+/* ----------- NAVBAR ----------- */
+.navbar {
+    background: var(--bg-card) !important;
+    border-color: var(--border) !important;
+    box-shadow: var(--shadow-sm);
+    padding: .75rem 0;
+}
+.navbar-brand { font-size: 1.1rem; letter-spacing: .08em; }
+
+/* ----------- CARD OVERRIDE ----------- */
+.card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: var(--shadow-md);
+    transition: background .3s, border-color .3s, box-shadow .3s;
+}
+
+/* ----------- FORM CONTROLS ----------- */
+.form-control, .form-select {
+    background: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    transition: all .2s;
+}
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 3px var(--accent-glow) !important;
+    border-color: var(--accent) !important;
+}
+.form-label { color: var(--text-muted); font-size: .85rem; font-weight: 600; margin-bottom: .35rem; }
+
+/* ----------- MODAL OVERRIDE ----------- */
+.modal-content {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: var(--shadow-lg);
+}
+.modal-header, .modal-footer { border-color: var(--border) !important; }
+.btn-close { filter: var(--text-primary) == '#f1f5f9' ? invert(1) : none; }
+
+/* ----------- LOCK ICON ANIMATION ----------- */
+.lock-icon-container {
+    width: 90px; height: 90px;
+    margin: 0 auto 1.2rem;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 3px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 20px var(--accent-glow);
+    transition: all .5s;
+}
+.lock-pulsing  { animation: lockPulse 2s ease-in-out infinite alternate; }
+.lock-unlocked { border-color: var(--success) !important; box-shadow: 0 0 30px rgba(34,197,94,.5) !important; animation: unlockPop .6s cubic-bezier(.175,.885,.32,1.275) forwards; }
+
+@keyframes lockPulse {
+    from { box-shadow: 0 0 8px var(--accent-glow); transform: scale(1);    }
+    to   { box-shadow: 0 0 28px var(--accent-glow); transform: scale(1.06); }
+}
+@keyframes unlockPop {
+    0%   { transform: scale(.8); }
+    55%  { transform: scale(1.15); }
+    100% { transform: scale(1);   }
+}
+
+/* =====================================================
+   DIGIT BOX (OTP-style)
+   ===================================================== */
+.digit-input-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+}
+.digit-box {
+    width: 58px; height: 68px;
+    font-size: 2rem; font-weight: 700;
+    text-align: center;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.06);
+    transition: border-color .2s, box-shadow .2s;
+    caret-color: transparent;
+    cursor: pointer;
+}
+.digit-box:focus, .digit-box.border-primary {
+    outline: none;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 4px var(--accent-glow) !important;
+}
+
+/* =====================================================
+   KEYPAD
+   ===================================================== */
+.keypad-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+.keypad-btn {
+    background: var(--bg-key);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 0;
+    font-size: 1.2rem; font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, transform .1s, box-shadow .15s;
+    user-select: none;
+    line-height: 1;
+}
+.keypad-btn:hover:not(:disabled) {
+    background: var(--bg-key-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+.keypad-btn:active:not(:disabled) { transform: translateY(1px); }
+.keypad-btn:disabled {
+    opacity: .25;
+    text-decoration: line-through;
+    cursor: not-allowed;
+}
+
+/* =====================================================
+   CLUE LIST
+   ===================================================== */
+.clue-item {
+    padding: 10px 14px;
+    border-left: 4px solid var(--accent);
+    background: var(--bg-body);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin-bottom: 8px;
+    font-size: .9rem;
+    transition: transform .15s;
+    animation: slideIn .25s ease-out both;
+}
+.clue-item:hover        { transform: translateX(3px); }
+.clue-item.clue-success { border-left-color: var(--success);  background: rgba(34,197,94,.07); }
+.clue-item.clue-danger  { border-left-color: var(--danger);   background: rgba(239,68,68,.07); }
+.clue-item.clue-warning { border-left-color: var(--warning);  background: rgba(245,158,11,.07); }
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* =====================================================
+   PROGRESS BAR (Time Attack)
+   ===================================================== */
+.progress          { background: var(--bg-key); height: 8px; border-radius: 4px; }
+.progress-bar      { transition: width .9s linear; }
+
+/* =====================================================
+   PLAY LAYOUT — auto 2-column split
+   Full height, columns auto-stretch
+   ===================================================== */
+#play-screen {
+    /* Remove container padding interference */
+}
+.play-split {
+    display: grid;
+    grid-template-columns: 1fr 380px;   /* clues flex, keypad fixed 380 */
+    gap: 1.25rem;
+    align-items: stretch;
+}
+.play-clues-col,
+.play-input-col {
+    display: flex;
+    flex-direction: column;
+}
+.play-clues-col .card,
+.play-input-col .card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.clues-scroll {
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(100vh - 380px);
+    min-height: 200px;
+    padding-right: 4px;
+}
+/* Thin scrollbar */
+.clues-scroll::-webkit-scrollbar { width: 5px; }
+.clues-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* Keypad column inner layout */
+.play-input-col .card {
+    justify-content: space-between;
+    gap: 0;
+}
+
+/* Responsive: stack on narrow screens */
+@media (max-width: 768px) {
+    .play-split {
+        grid-template-columns: 1fr;
+    }
+    .clues-scroll {
+        max-height: 260px;
+    }
+    .digit-box  { width: 46px; height: 56px; font-size: 1.6rem; }
+    .keypad-btn { padding: 11px 0; font-size: 1rem; }
+}
+
+/* =====================================================
+   UTILITY
+   ===================================================== */
+.text-accent { color: var(--accent); }
+.badge { font-size: .75rem; font-weight: 600; }
+
+/* Welcome banner */
+#welcome-prompt-banner {
+    background: rgba(245,158,11,.12);
+    border: 1px solid rgba(245,158,11,.4);
+    color: var(--text-primary);
+    border-radius: var(--radius-sm);
+}
