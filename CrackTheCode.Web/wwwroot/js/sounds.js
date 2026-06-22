@@ -5,14 +5,18 @@
 const Sound = (() => {
     let muted = localStorage.getItem("muted") === "true";
 
+    // OGG nhẹ hơn nhiều; Safari cũ không hỗ trợ -> dỹ phòng .wav
+    const EXT = document.createElement("audio")
+        .canPlayType('audio/ogg; codecs="vorbis"') ? "ogg" : "wav";
+
     // Âm lượng riêng cho từng hiệu ứng
     const SFX = {
-        key:   { src: "sounds/key.wav",   vol: 0.35 },
-        click: { src: "sounds/click.wav", vol: 0.45 },
-        win:   { src: "sounds/win.wav",   vol: 0.55 },
-        wrong: { src: "sounds/wrong.wav", vol: 0.50 },
-        hint:  { src: "sounds/hint.wav",  vol: 0.50 },
-        lose:  { src: "sounds/lose.wav",  vol: 0.50 },
+        key:   { src: `sounds/key.${EXT}`,   vol: 0.35 },
+        click: { src: `sounds/click.${EXT}`, vol: 0.45 },
+        win:   { src: `sounds/win.${EXT}`,   vol: 0.55 },
+        wrong: { src: `sounds/wrong.${EXT}`, vol: 0.50 },
+        hint:  { src: `sounds/hint.${EXT}`,  vol: 0.50 },
+        lose:  { src: `sounds/lose.${EXT}`,  vol: 0.50 },
     };
 
     // Tải sẵn các hiệu ứng
@@ -23,7 +27,7 @@ const Sound = (() => {
     }
 
     // Nhạc nền (lặp vô hạn, âm lượng thấp)
-    const bgm = new Audio("sounds/bgm.wav");
+    const bgm = new Audio(`sounds/bgm.${EXT}`);
     bgm.loop = true;
     bgm.volume = 0.22;
 

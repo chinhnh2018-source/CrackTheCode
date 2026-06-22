@@ -582,7 +582,7 @@ function submitGuess() {
         if (data.isCorrect) {
             handleGameWin(data.secretCode);
         } else {
-            handleGameIncorrect(data.message, guess);
+            handleGameIncorrect(data.message, guess, data.bulls, data.cows);
         }
     })
     .catch(() => showToast("Lỗi kết nối khi nộp đáp án!", "danger"));
@@ -590,6 +590,7 @@ function submitGuess() {
 
 function handleGameWin(secretCode) {
     Sound.play("win");
+    launchConfetti();
     if (gameState.timerInterval) clearInterval(gameState.timerInterval);
     disableKeypadKeys();
     showFeedback(`🎉 CHÚC MỪNG, <strong>${authState.username || "Bạn"}</strong>! Đã bẻ khóa thành công! Mật mã là <strong>${secretCode}</strong>.`, "success");
@@ -602,18 +603,26 @@ function handleGameWin(secretCode) {
     }
 }
 
-function handleGameIncorrect(serverMsg, guess) {
+function handleGameIncorrect(serverMsg, guess, bulls, cows) {
     Sound.play("wrong");
     showFeedback(serverMsg, "danger");
     clearAllDigits();
-    addGuessToHistory(guess, serverMsg);
+    addGuessToHistory(guess, bulls, cows);
 }
 
-function addGuessToHistory(guess, feedbackMsg) {
+function addGuessToHistory(guess, bulls, cows) {
     const list = document.getElementById("clues-list");
+    const rest = Math.max(0, gameState.digitsCount - (bulls || 0) - (cows || 0));
+    const dots = "\u{1F7E2}".repeat(bulls || 0) + "\u{1F7E1}".repeat(cows || 0) + "\u26AA".repeat(rest);
     const div = document.createElement("div");
     div.className = "clue-item clue-danger";
-    div.innerHTML = `<span class="badge bg-danger me-2">✗</span><strong>Thử (${guess.split("").join(" ")}):</strong> ${feedbackMsg.replace("Sai rồi! Phản hồi: ", "")}`;
+    div.innerHTML = `
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-danger">✗</span>
+            <strong style="letter-spacing:2px;">${guess.split("").join(" ")}</strong>
+            <span class="ms-auto" style="font-size:1rem;">${dots}</span>
+        </div>
+        <div class="text-muted small mt-1">${bulls || 0} đúng vị trí · ${cows || 0} có nhưng sai vị trí</div>`;
     list.prepend(div);
 }
 
